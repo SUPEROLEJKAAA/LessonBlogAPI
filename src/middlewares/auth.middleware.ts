@@ -9,7 +9,7 @@ export const authMiddleware = {
       const token: string = tokenField.split(" ")[1];
       if (token === goodToken) {
         next();
-        return
+        return;
       }
     }
     res.status(401).send();

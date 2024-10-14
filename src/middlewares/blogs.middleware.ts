@@ -1,7 +1,4 @@
-import {
-  body,
-  param,
-} from "express-validator";
+import { body, param } from "express-validator";
 
 export const blogsMiddleware = {
   input: [

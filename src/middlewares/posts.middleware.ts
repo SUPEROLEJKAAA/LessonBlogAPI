@@ -25,8 +25,8 @@ export const postsMiddleware = {
       .custom((id: string) => {
         const blog: outputBlogType | undefined = blogsReposity.findOneById(id);
         if (blog) {
-          return true
-        };
+          return true;
+        }
         return false;
       })
       .withMessage("Invalid blogId field"),

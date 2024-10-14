@@ -6,8 +6,24 @@ import { postsController } from "../controllers/posts.controller";
 
 export const postsRouter = Router();
 
-postsRouter.get("/", postsController.all)
-postsRouter.get("/:id", postsController.findOneById)
-postsRouter.post("/", authMiddleware.validate, postsMiddleware.input, errorHandler, postsController.create)
-postsRouter.put("/:id", authMiddleware.validate, postsMiddleware.input, errorHandler, postsController.updateOneById)
-postsRouter.delete("/:id", authMiddleware.validate, postsController.deleteOneById)
+postsRouter.get("/", postsController.all);
+postsRouter.get("/:id", postsController.findOneById);
+postsRouter.post(
+  "/",
+  authMiddleware.validate,
+  postsMiddleware.input,
+  errorHandler,
+  postsController.create
+);
+postsRouter.put(
+  "/:id",
+  authMiddleware.validate,
+  postsMiddleware.input,
+  errorHandler,
+  postsController.updateOneById
+);
+postsRouter.delete(
+  "/:id",
+  authMiddleware.validate,
+  postsController.deleteOneById
+);
