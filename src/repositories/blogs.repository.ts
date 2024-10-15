@@ -1,31 +1,34 @@
-import { db } from "../db/db";
-import { inputBlogType, outputBlogType } from "../types/blogs.type";
 import { v4 as uuid } from "uuid";
+import {  blogsCollection } from "../db/collections";
+import { inputBlogType, outputBlogType } from "../types/blogs.type";
 
 export const blogsReposity = {
-  all: (): outputBlogType[] => {
-    return db.blogs;
+  all: async (): Promise<outputBlogType[]> => {
+    return await blogsCollection.find({}, { projection: { _id: 0 } }).toArray();
   },
-  create: (data: inputBlogType): outputBlogType => {
-    const newPost = {
-      id: uuid(),
+  create: async (data: inputBlogType): Promise<outputBlogType | null> => {
+    const id: string = uuid();
+    await blogsCollection.insertOne({
+      id,
       ...data,
-    };
-    db.blogs.push(newPost);
-    return newPost;
+      createdAt: new Date(),
+      isMembership: false,
+    });
+    const post: outputBlogType | null = await blogsCollection
+      .findOne({ id }, { projection: { _id: 0 } })
+    return post;
   },
-  findOneById: (id: string): outputBlogType | undefined => {
-    const blog = db.blogs.find((b) => b.id === id);
+  findOneById: async (id: string): Promise<outputBlogType | null> => {
+    const blog: outputBlogType | null = await blogsCollection
+      .findOne({ id }, { projection: { _id: 0 } })
     return blog;
   },
-  findIndexById: (id: string): number => {
-    return db.blogs.findIndex((b) => b.id === id)
+  updateOneById: async (id: string, data: inputBlogType): Promise<void> => {
+    await blogsCollection.findOneAndUpdate({ id }, { $set: { ...data } });
+    return;
   },
-  updateById: (index: number, data: inputBlogType): void => {
-    const updatedBlog: outputBlogType = { ...db.blogs[index], ...data };
-    db.blogs[index] = updatedBlog;
+  deleteOneById: async (id: string): Promise<void> => {
+    await blogsCollection.deleteOne({ id });
+    return;
   },
-  delete: (index: number): void => {
-    db.blogs.splice(index, 1)
-  }
 };

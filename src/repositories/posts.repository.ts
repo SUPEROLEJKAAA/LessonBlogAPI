@@ -1,45 +1,36 @@
-import { db } from "../db/db";
 import { v4 as uuid } from "uuid";
 import { inputPostType, outputPostType } from "../types/posts.type";
 import { blogsReposity } from "./blogs.repository";
 import { outputBlogType } from "../types/blogs.type";
+import { postsCollection } from "../db/collections";
 
 export const postsRepository = {
-  all: (): outputPostType[] => {
-    return db.posts;
+  all: async (): Promise<outputPostType[]> => {
+    return await postsCollection.find({}, { projection: { _id: 0 } }).toArray();
   },
-  create: (data: inputPostType): outputPostType => {
-    const blog: outputBlogType | undefined = blogsReposity.findOneById(
+  create: async (data: inputPostType): Promise<outputPostType> => {
+    const id: string = uuid();
+    const blog = (await blogsReposity.findOneById(
       data.blogId
-    );
-    const newPost: outputPostType = {
-      id: uuid(),
+    )) as outputBlogType;
+    await postsCollection.insertOne({
+      id,
       ...data,
-      blogName: blog?.name as any,
-    };
-    db.posts.push(newPost);
-    return newPost;
+      blogName: blog?.name as string,
+      createdAt: new Date(),
+    });
+    const post = (await postsRepository.findOneById(id)) as outputPostType;
+    return post;
   },
-  findOneById: (id: string): outputPostType | undefined => {
-    return db.posts.find((p) => p.id === id);
+  findOneById: async (id: string): Promise<outputPostType | null> => {
+    return await postsCollection.findOne({ id }, { projection: { _id: 0 } });
   },
-  findOneByIndex: (id: string): number => {
-    return db.posts.findIndex((p) => p.id === id);
+  updateOneById: async (id: string, data: inputPostType): Promise<void> => {
+    await postsCollection.findOneAndUpdate({ id }, { $set: { ...data } });
+    return;
   },
-  updateOneById: (index: number, data: inputPostType): void => {
-    console.log(data);
-    const post: outputPostType = db.posts[index];
-    const blog: outputBlogType | undefined = blogsReposity.findOneById(
-      data.blogId
-    );
-    const newPost: outputPostType = {
-      ...post,
-      ...data,
-      blogName: blog?.name as string
-    };
-    db.posts[index] = newPost;
-  },
-  delete: (index: number): void => {
-    db.posts.splice(index, 1);
+  deleteOneById: async (id: string): Promise<void> => {
+    await postsCollection.deleteOne({ id });
+    return;
   },
 };

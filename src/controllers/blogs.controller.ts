@@ -2,51 +2,55 @@ import { Request, Response } from "express";
 import { blogsReposity } from "../repositories/blogs.repository";
 import { inputBlogType, outputBlogType } from "../types/blogs.type";
 import { matchedData } from "express-validator";
+import { ObjectId } from "mongodb";
 
 export const blogsController = {
-  all: (req: Request, res: Response<outputBlogType[]>): void => {
-    const blogs: outputBlogType[] = blogsReposity.all();
+  all: async (req: Request, res: Response<outputBlogType[]>): Promise<void> => {
+    const blogs: outputBlogType[] = await blogsReposity.all();
     res.status(200).json(blogs);
   },
-  findById: (req: Request, res: Response<outputBlogType>): void => {
-    const id: string = req.params.id
-    const blog: outputBlogType | undefined = blogsReposity.findOneById(id);
+  findById: async (
+    req: Request,
+    res: Response<outputBlogType>
+  ): Promise<void> => {
+    const id: string = req.params.id;
+    const blog: outputBlogType | null = await blogsReposity.findOneById(id);
     if (blog) {
       res.status(200).json(blog);
       return;
     }
     res.status(404).send();
   },
-  create: (
+  create: async (
     req: Request<any, any, inputBlogType>,
     res: Response<outputBlogType | any>
-  ): void => {
+  ): Promise<void> => {
     const data: inputBlogType = matchedData(req);
-    const blog: outputBlogType = blogsReposity.create(data);
+    const blog: outputBlogType | null = await blogsReposity.create(data);
     res.status(201).json(blog);
   },
-  updateById: (
+  updateById: async (
     req: Request<any, any, inputBlogType>,
     res: Response<outputBlogType>
-  ): void => {
+  ): Promise<void> => {
     const data: inputBlogType = matchedData(req);
     const id: string = req.params.id;
-    const blogIndex: number = blogsReposity.findIndexById(id);
-    if (blogIndex != -1) {
-      blogsReposity.updateById(blogIndex, data);
+    const blog: outputBlogType | null = await blogsReposity.findOneById(id);
+    if (blog) {
+      await blogsReposity.updateOneById(blog.id, data);
       res.status(204).send();
-      return
+      return;
     }
     res.status(404).send();
   },
-  deleteOneById: (req: Request, res: Response): void => {
-    const id: string = req.params.id
-    const blogIndex:number = blogsReposity.findIndexById(id)
-    if(blogIndex != -1) {
-      blogsReposity.delete(blogIndex)
-      res.status(204).send()
-      return
+  deleteById: async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    const blog: outputBlogType | null = await blogsReposity.findOneById(id);
+    if (blog) {
+      await blogsReposity.deleteOneById(blog.id);
+      res.status(204).send();
+      return;
     }
-    res.status(404).send()
-  }
+    res.status(404).send();
+  },
 };

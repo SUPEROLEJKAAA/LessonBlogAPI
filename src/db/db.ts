@@ -1,13 +1,18 @@
-import { outputBlogType } from "../types/blogs.type"
-import { dbType } from "../types/db.type"
-import { outputPostType } from "../types/posts.type"
+import { Db, MongoClient } from "mongodb";
+import { config } from "../config";
 
-export const db: dbType = {
-    blogs: [],
-    posts: []
-}
+const mongoUri: string = config.mongoUri;
+const client: MongoClient = new MongoClient(mongoUri);
+export const dbConnection: Db = client.db("blogapi");
 
-export const clear = () => {
-    db.blogs = []
-    db.posts = []
+export async function connectToMongo(): Promise<boolean> {
+  try {
+    await client.connect();
+    console.log("Connected to Mongo");
+    return true;
+  } catch (e) {
+    await client.close();
+    console.log(e);
+    return false;
+  }
 }

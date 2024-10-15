@@ -24,13 +24,11 @@ export const postsMiddleware = {
       .withMessage("max length is 1000"),
     body("blogId")
       .trim()
-      .custom((id: string) => {
-        const blog: outputBlogType | undefined = blogsReposity.findOneById(id);
-        if (blog) {
-          return true;
+      .custom(async (id: string) => {
+        const blog: outputBlogType | null = await blogsReposity.findOneById(id);
+        if (!blog) {
+          throw new Error("invalid blogId field");
         }
-        return false;
       })
-      .withMessage("Invalid blogId field"),
   ],
 };

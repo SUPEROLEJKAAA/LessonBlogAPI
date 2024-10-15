@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { clear } from "../db/db";
+import { blogsCollection, postsCollection } from "../db/collections";
 
 export const testsController = {
   clear: (req: Request, res: Response): void => {
-    clear();
+    postsCollection.drop()
+    blogsCollection.drop()
     res.status(204).send();
   },
 };

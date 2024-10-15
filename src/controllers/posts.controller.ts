@@ -4,46 +4,46 @@ import { inputPostType, outputPostType } from "../types/posts.type";
 import { matchedData } from "express-validator";
 
 export const postsController = {
-  all: (req: Request, res: Response<outputPostType[]>): void => {
-    const posts: outputPostType[] = postsRepository.all();
+  all: async (req: Request, res: Response<outputPostType[]>): Promise<void> => {
+    const posts: outputPostType[] = await postsRepository.all();
     res.status(200).json(posts);
   },
-  create: (
+  create: async (
     req: Request<any, any, inputPostType>,
     res: Response<outputPostType>
-  ): void => {
+  ): Promise<void> => {
     const data: inputPostType = matchedData(req);
-    const newPost: outputPostType = postsRepository.create(data);
+    const newPost: outputPostType = await postsRepository.create(data);
     res.status(201).json(newPost);
   },
-  findOneById: (req: Request, res: Response): void => {
+  findOneById: async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
-    const post: outputPostType | undefined = postsRepository.findOneById(id);
+    const post: outputPostType | null = await postsRepository.findOneById(id);
     if (post) {
       res.status(200).json(post);
       return;
     }
     res.status(404).send();
   },
-  updateOneById: (
+  updateOneById: async (
     req: Request<any, any, inputPostType>,
     res: Response
-  ): void => {
+  ): Promise<void> => {
     const id: string = req.params.id;
     const data: inputPostType = matchedData(req);
-    const postIndex: number = postsRepository.findOneByIndex(id);
-    if (postIndex != -1) {
-      postsRepository.updateOneById(postIndex, data);
+    const post: outputPostType | null = await postsRepository.findOneById(id);
+    if (post) {
+      await postsRepository.updateOneById(post.id, data);
       res.status(204).send();
       return;
     }
     res.status(404).send();
   },
-  deleteOneById: (req: Request, res: Response): void => {
+  deleteOneById: async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
-    const postIndex: number = postsRepository.findOneByIndex(id);
-    if (postIndex != -1) {
-      postsRepository.delete(postIndex);
+    const post: outputPostType | null = await postsRepository.findOneById(id);
+    if (post) {
+      postsRepository.deleteOneById(post.id);
       res.status(204).send();
       return;
     }

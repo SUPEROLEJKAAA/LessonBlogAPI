@@ -22,4 +22,4 @@ blogsRouter.put(
   errorHandler,
   blogsController.updateById
 );
-blogsRouter.delete("/:id", authMiddleware, blogsController.deleteOneById);
+blogsRouter.delete("/:id", authMiddleware, blogsController.deleteById);
