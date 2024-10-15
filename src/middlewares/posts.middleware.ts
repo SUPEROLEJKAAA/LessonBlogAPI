@@ -4,20 +4,22 @@ import { outputBlogType } from "../types/blogs.type";
 
 export const postsMiddleware = {
   input: [
-    body("title").trim().not().isEmpty().withMessage("title is required"),
-    body("title").trim().isLength({ max: 30 }).withMessage("max length is 30"),
+    body("title")
+      .trim()
+      .notEmpty()
+      .withMessage("title is required")
+      .isLength({ max: 30 })
+      .withMessage("max length is 30"),
     body("shortDescription")
       .trim()
-      .not()
-      .isEmpty()
-      .withMessage("shortDescription is required"),
-    body("shortDescription")
-      .trim()
+      .notEmpty()
+      .withMessage("shortDescription is required")
       .isLength({ max: 100 })
       .withMessage("max length is 100"),
-    body("content").trim().not().isEmpty().withMessage("content is required"),
     body("content")
       .trim()
+      .notEmpty()
+      .withMessage("content is required")
       .isLength({ max: 1000 })
       .withMessage("max length is 1000"),
     body("blogId")

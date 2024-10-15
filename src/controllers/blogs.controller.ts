@@ -9,15 +9,13 @@ export const blogsController = {
     res.status(200).json(blogs);
   },
   findById: (req: Request, res: Response<outputBlogType>): void => {
-    const data = matchedData(req);
-    const blog: outputBlogType | undefined = blogsReposity.findOneById(
-      data.id as string
-    );
+    const id: string = req.params.id
+    const blog: outputBlogType | undefined = blogsReposity.findOneById(id);
     if (blog) {
       res.status(200).json(blog);
       return;
     }
-    res.status(400).send();
+    res.status(404).send();
   },
   create: (
     req: Request<any, any, inputBlogType>,

@@ -17,7 +17,7 @@ export const postsRepository = {
       ...data,
       blogName: blog?.name as any,
     };
-    db.posts.push(newPost)
+    db.posts.push(newPost);
     return newPost;
   },
   findOneById: (id: string): outputPostType | undefined => {
@@ -27,14 +27,19 @@ export const postsRepository = {
     return db.posts.findIndex((p) => p.id === id);
   },
   updateOneById: (index: number, data: inputPostType): void => {
-    const post: inputPostType = db.posts[index]
+    console.log(data);
+    const post: outputPostType = db.posts[index];
     const blog: outputBlogType | undefined = blogsReposity.findOneById(
       data.blogId
     );
-    const newPost: outputPostType = { ...post, ...data, ...(blog?.name as any) };
+    const newPost: outputPostType = {
+      ...post,
+      ...data,
+      blogName: blog?.name as string
+    };
     db.posts[index] = newPost;
   },
   delete: (index: number): void => {
-    db.posts.splice(index, 1)
-  }
+    db.posts.splice(index, 1);
+  },
 };

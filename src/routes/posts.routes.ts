@@ -10,20 +10,20 @@ postsRouter.get("/", postsController.all);
 postsRouter.get("/:id", postsController.findOneById);
 postsRouter.post(
   "/",
-  authMiddleware.validate,
+  authMiddleware,
   postsMiddleware.input,
   errorHandler,
   postsController.create
 );
 postsRouter.put(
   "/:id",
-  authMiddleware.validate,
+  authMiddleware,
   postsMiddleware.input,
   errorHandler,
   postsController.updateOneById
 );
 postsRouter.delete(
   "/:id",
-  authMiddleware.validate,
+  authMiddleware,
   postsController.deleteOneById
 );

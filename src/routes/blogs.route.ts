@@ -10,16 +10,16 @@ blogsRouter.get("/", blogsController.all);
 blogsRouter.get("/:id", blogsController.findById);
 blogsRouter.post(
   "/",
-  authMiddleware.validate,
+  authMiddleware,
   blogsMiddleware.input,
   errorHandler,
   blogsController.create
 );
 blogsRouter.put(
   "/:id",
-  authMiddleware.validate,
+  authMiddleware,
   blogsMiddleware.input,
   errorHandler,
   blogsController.updateById
 );
-blogsRouter.delete("/:id", authMiddleware.validate, blogsController.deleteOneById);
+blogsRouter.delete("/:id", authMiddleware, blogsController.deleteOneById);
