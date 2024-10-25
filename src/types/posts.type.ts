@@ -1,19 +1,17 @@
-import { ObjectId } from "mongodb"
+import { ObjectId } from "mongodb";
 
-export type inputPostType = {
-    title: string,
-    shortDescription: string,
-    content: string,
-    blogId: string,
+export type PostEntityDB = {
+  _id: ObjectId;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName: string;
+  createdAt: Date;
+};
 
-}
+export type PostEntityResponse = Omit<PostEntityDB, "_id"> & {
+  id: string;
+};
 
-export type outputPostType = {
-    id: string
-    title: string,
-    shortDescription: string,
-    content: string,
-    blogId: string,
-    blogName: string,
-    createdAt: Date,
-}
+export type PostEntityInput = Omit<PostEntityDB, "_id" | "blogName" | "createdAt">;

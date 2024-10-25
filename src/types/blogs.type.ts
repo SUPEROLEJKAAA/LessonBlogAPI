@@ -1,18 +1,14 @@
-import { ObjectId } from "mongodb"
+import { ObjectId } from "mongodb";
 
-export type inputBlogType = {
-    name: string,
-    description: string,
-    websiteUrl: string,
-    createdAt: Date,
-    isMembership: boolean
-}
-
-export type outputBlogType = {
-    id: string,
-    name: string,
-    description: string,
-    websiteUrl: string,
-    createdAt: Date,
-    isMembership: boolean
-}
+export type BlogEntityDB = {
+  _id: ObjectId;
+  name: string;
+  description: string;
+  websiteUrl: string;
+  createdAt: Date;
+  isMembership: boolean;
+};
+export type BlogEntityResponse = Omit<BlogEntityDB, "_id"> & {
+  id: string;
+};
+export type BlogEntityInput = Omit<BlogEntityDB, "_id" | "createdAt" | "isMembership">;

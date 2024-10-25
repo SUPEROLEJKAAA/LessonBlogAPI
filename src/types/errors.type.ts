@@ -1,8 +1,8 @@
-export type errorsType = {
-    errorsMessages: errorMessageType[];
-  };
+export type ErrorsType = {
+  errorsMessages: ErrorMessageType[];
+};
 
-export type errorMessageType = {
-  message: string,
-  field: string
-}
+export type ErrorMessageType = {
+  message: string;
+  field: string;
+};

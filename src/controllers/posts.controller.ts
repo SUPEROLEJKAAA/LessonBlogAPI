@@ -1,39 +1,53 @@
 import { Request, Response } from "express";
-import { postsRepository } from "../repositories/posts.repository";
-import { inputPostType, outputPostType } from "../types/posts.type";
 import { matchedData } from "express-validator";
+import { postsService } from "../services/posts.service";
+import { paginationHelper } from "../utils/pagination.helper";
+import { blogsQueryRepository } from "../repositories/blogs/blogs.query.repository";
+import { postsQueryRepository } from "../repositories/posts/posts.query.repostiry";
+import { PostEntityDB, PostEntityInput, PostEntityResponse } from "../types/posts.type";
+import { OutputPaginationType, PaginationParamType } from "../types/pagination.type";
+import { BlogEntityResponse } from "../types/blogs.type";
+import { ObjectId } from "mongodb";
 
 export const postsController = {
-  all: async (req: Request, res: Response<outputPostType[]>): Promise<void> => {
-    const posts: outputPostType[] = await postsRepository.all();
+  getPosts: async (req: Request, res: Response<OutputPaginationType>): Promise<void> => {
+    const data: PaginationParamType = matchedData(req);
+    const params: PaginationParamType = paginationHelper.mapping(data, "posts");
+    const posts: OutputPaginationType = await postsQueryRepository.getPosts(params);
     res.status(200).json(posts);
   },
-  create: async (
-    req: Request<any, any, inputPostType>,
-    res: Response<outputPostType>
-  ): Promise<void> => {
-    const data: inputPostType = matchedData(req);
-    const newPost: outputPostType = await postsRepository.create(data);
-    res.status(201).json(newPost);
+  create: async (req: Request, res: Response): Promise<void> => {
+    const data: PostEntityInput = matchedData(req);
+    const postId: string | null = await postsService.create(data);
+    if (postId) {
+      const post: PostEntityResponse | null = await postsQueryRepository.findOneById(postId);
+      res.status(201).json(post);
+      return;
+    }
+    res.status(400).send();
   },
   findOneById: async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
-    const post: outputPostType | null = await postsRepository.findOneById(id);
+    if(!ObjectId.isValid(id)) {
+      res.status(404).send()
+      return
+    }
+    const post: PostEntityResponse | null = await postsQueryRepository.findOneById(id);
     if (post) {
       res.status(200).json(post);
       return;
     }
     res.status(404).send();
   },
-  updateOneById: async (
-    req: Request<any, any, inputPostType>,
-    res: Response
-  ): Promise<void> => {
+  updateOneById: async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
-    const data: inputPostType = matchedData(req);
-    const post: outputPostType | null = await postsRepository.findOneById(id);
-    if (post) {
-      await postsRepository.updateOneById(post.id, data);
+    if(!ObjectId.isValid(id)) {
+      res.status(404).send()
+      return
+    }
+    const data: PostEntityDB = matchedData(req);
+    const isUpdated: boolean = await postsService.updateOneById(id, data);
+    if (isUpdated) {
       res.status(204).send();
       return;
     }
@@ -41,12 +55,46 @@ export const postsController = {
   },
   deleteOneById: async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
-    const post: outputPostType | null = await postsRepository.findOneById(id);
-    if (post) {
-      postsRepository.deleteOneById(post.id);
+    if(!ObjectId.isValid(id)) {
+      res.status(404).send()
+      return
+    }
+    const isDeleted: boolean = await postsService.deleteOneById(id);
+    if (isDeleted) {
       res.status(204).send();
       return;
     }
     res.status(404).send();
+  },
+  createPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    if(!ObjectId.isValid(id)) {
+      res.status(404).send()
+      return
+    }
+    const data: PostEntityInput = { ...matchedData(req), blogId: id };
+    const postId: string | null = await postsService.create(data);
+    if (postId) {
+      const post: PostEntityResponse | null = await postsQueryRepository.findOneById(postId);
+      res.status(201).send(post);
+      return;
+    }
+    res.status(404).send();
+  },
+  getPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    if(!ObjectId.isValid(id)) {
+      res.status(404).send()
+      return
+    }
+    const blog: BlogEntityResponse | null = await blogsQueryRepository.findOneById(id);
+    if (!blog) {
+      res.status(404).send();
+      return;
+    }
+    const data = { ...(matchedData(req) as PaginationParamType), blogId: blog.id };
+    const params = paginationHelper.mapping(data, "posts");
+    const posts = await postsQueryRepository.getPosts(params);
+    res.status(200).send(posts);
   },
 };

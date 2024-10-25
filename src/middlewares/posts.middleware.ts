@@ -1,9 +1,10 @@
-import { body } from "express-validator";
-import { blogsReposity } from "../repositories/blogs.repository";
-import { outputBlogType } from "../types/blogs.type";
+import { body, param } from "express-validator";
+import { BlogEntityResponse } from "../types/blogs.type";
+import { blogsQueryRepository } from "../repositories/blogs/blogs.query.repository";
+import { ObjectId } from "mongodb";
 
 export const postsMiddleware = {
-  input: [
+  inputData: [
     body("title")
       .trim()
       .notEmpty()
@@ -25,10 +26,30 @@ export const postsMiddleware = {
     body("blogId")
       .trim()
       .custom(async (id: string) => {
-        const blog: outputBlogType | null = await blogsReposity.findOneById(id);
+        const blog: BlogEntityResponse | null = await blogsQueryRepository.findOneById(id);
         if (!blog) {
           throw new Error("invalid blogId field");
         }
-      })
+      }),
+  ],
+  inputWithoutBlogId: [
+    body("title")
+      .trim()
+      .notEmpty()
+      .withMessage("title is required")
+      .isLength({ max: 30 })
+      .withMessage("max length is 30"),
+    body("shortDescription")
+      .trim()
+      .notEmpty()
+      .withMessage("shortDescription is required")
+      .isLength({ max: 100 })
+      .withMessage("max length is 100"),
+    body("content")
+      .trim()
+      .notEmpty()
+      .withMessage("content is required")
+      .isLength({ max: 1000 })
+      .withMessage("max length is 1000"),
   ],
 };
