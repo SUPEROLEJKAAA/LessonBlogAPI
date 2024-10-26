@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
 import { usersService } from "../services/users.service";
-import { UserEntityAuth, UserEntityInput } from "../types/users.type";
+import { UserEntityInput } from "../types/users.type";
 import { usersQueryRepository } from "../repositories/users/users.query.repository";
 import { paginationHelper } from "../utils/pagination.helper";
 import { OutputPaginationType, PaginationParamType } from "../types/pagination.type";
-import { ObjectId } from "mongodb";
 
 export const usersController = {
   getUsers: async (req: Request, res: Response): Promise<void> => {
@@ -32,14 +31,5 @@ export const usersController = {
       return;
     }
     res.status(404).send();
-  },
-  auth: async (req: Request, res: Response) => {
-    const data: UserEntityAuth = matchedData(req);
-    const result = await usersService.auth(data);
-    if (result) {
-      res.status(204).send();
-      return;
-    }
-    res.status(401).send();
-  },
+  }
 };

@@ -65,36 +65,5 @@ export const postsController = {
       return;
     }
     res.status(404).send();
-  },
-  createPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    if(!ObjectId.isValid(id)) {
-      res.status(404).send()
-      return
-    }
-    const data: PostEntityInput = { ...matchedData(req), blogId: id };
-    const postId: string | null = await postsService.create(data);
-    if (postId) {
-      const post: PostEntityResponse | null = await postsQueryRepository.findOneById(postId);
-      res.status(201).send(post);
-      return;
-    }
-    res.status(404).send();
-  },
-  getPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    if(!ObjectId.isValid(id)) {
-      res.status(404).send()
-      return
-    }
-    const blog: BlogEntityResponse | null = await blogsQueryRepository.findOneById(id);
-    if (!blog) {
-      res.status(404).send();
-      return;
-    }
-    const data = { ...(matchedData(req) as PaginationParamType), blogId: blog.id };
-    const params = paginationHelper.mapping(data, "posts");
-    const posts = await postsQueryRepository.getPosts(params);
-    res.status(200).send(posts);
-  },
+  }
 };

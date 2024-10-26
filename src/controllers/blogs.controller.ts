@@ -5,6 +5,9 @@ import { paginationHelper } from "../utils/pagination.helper";
 import { blogsQueryRepository } from "../repositories/blogs/blogs.query.repository";
 import { BlogEntityInput, BlogEntityResponse } from "../types/blogs.type";
 import { OutputPaginationType, PaginationParamType } from "../types/pagination.type";
+import { postsQueryRepository } from "../repositories/posts/posts.query.repostiry";
+import { PostEntityInput, PostEntityResponse } from "../types/posts.type";
+import { postsService } from "../services/posts.service";
 
 export const blogsController = {
   create: async (req: Request, res: Response): Promise<void> => {
@@ -46,5 +49,28 @@ export const blogsController = {
       return;
     }
     res.status(404).send();
+  },
+  createPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    const data: PostEntityInput = { ...matchedData(req), blogId: id };
+    const postId: string | null = await postsService.create(data);
+    if (postId) {
+      const post: PostEntityResponse | null = await postsQueryRepository.findOneById(postId);
+      res.status(201).send(post);
+      return;
+    }
+    res.status(404).send();
+  },
+  getPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    const blog: BlogEntityResponse | null = await blogsQueryRepository.findOneById(id);
+    if (!blog) {
+      res.status(404).send();
+      return;
+    }
+    const data = { ...(matchedData(req) as PaginationParamType), blogId: blog.id };
+    const params = paginationHelper.mapping(data, "posts");
+    const posts = await postsQueryRepository.getPosts(params);
+    res.status(200).send(posts);
   },
 };
