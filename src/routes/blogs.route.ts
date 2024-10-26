@@ -1,25 +1,25 @@
 import { Router } from "express";
 import { blogsController } from "../controllers/blogs.controller";
-import { blogsMiddleware } from "../middlewares/blogs.middleware";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { blogsValidator } from "../middlewares/validators/blogs.validator";
+import { authMiddleware } from "../middlewares/auth/auth.middleware";
 import { errorHandler } from "../middlewares/errors.middleware";
 import { postsController } from "../controllers/posts.controller";
-import { paginationMiddleware } from "../middlewares/pagination.middleware";
-import { postsMiddleware } from "../middlewares/posts.middleware";
-import { ObjectIDMiddleware } from "../middlewares/objectid.middleware";
+import { paginationValidator } from "../middlewares/validators/pagination.validator";
+import { postsValidator } from "../middlewares/validators/posts.validator";
+import { ObjectIDValidator } from "../middlewares/validators/objectid.validator";
 
 export const blogsRouter = Router();
 
-blogsRouter.get("/", paginationMiddleware.blogs, blogsController.getBlogs);
-blogsRouter.get("/:id", ObjectIDMiddleware, blogsController.findById);
-blogsRouter.get("/:id/posts", paginationMiddleware.posts, ObjectIDMiddleware, postsController.getPostsByBlogId);
+blogsRouter.get("/", paginationValidator.blogs, blogsController.getBlogs);
+blogsRouter.get("/:id", ObjectIDValidator, blogsController.findById);
+blogsRouter.get("/:id/posts", paginationValidator.posts, ObjectIDValidator, postsController.getPostsByBlogId);
 blogsRouter.post(
   "/:id/posts",
   authMiddleware,
-  postsMiddleware.inputWithoutBlogId,
+  postsValidator.inputWithoutBlogId,
   errorHandler,
   postsController.createPostsByBlogId,
 );
-blogsRouter.post("/", authMiddleware, blogsMiddleware.input, errorHandler, blogsController.create);
-blogsRouter.put("/:id", authMiddleware, blogsMiddleware.input, errorHandler, ObjectIDMiddleware, blogsController.updateById);
-blogsRouter.delete("/:id", authMiddleware, ObjectIDMiddleware, blogsController.deleteById);
+blogsRouter.post("/", authMiddleware, blogsValidator.input, errorHandler, blogsController.create);
+blogsRouter.put("/:id", authMiddleware, blogsValidator.input, errorHandler, ObjectIDValidator, blogsController.updateById);
+blogsRouter.delete("/:id", authMiddleware, ObjectIDValidator, blogsController.deleteById);

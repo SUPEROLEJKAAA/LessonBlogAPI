@@ -1,22 +1,22 @@
 import { Router } from "express";
 import { postsController } from "../controllers/posts.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
-import { postsMiddleware } from "../middlewares/posts.middleware";
+import { authMiddleware } from "../middlewares/auth/auth.middleware";
+import { postsValidator } from "../middlewares/validators/posts.validator";
 import { errorHandler } from "../middlewares/errors.middleware";
-import { paginationMiddleware } from "../middlewares/pagination.middleware";
-import { ObjectIDMiddleware } from "../middlewares/objectid.middleware";
+import { paginationValidator } from "../middlewares/validators/pagination.validator";
+import { ObjectIDValidator } from "../middlewares/validators/objectid.validator";
 
 export const postsRouter = Router();
 
-postsRouter.get("/", paginationMiddleware.posts, postsController.getPosts);
-postsRouter.get("/:id", ObjectIDMiddleware, postsController.findOneById);
-postsRouter.post("/", authMiddleware, postsMiddleware.inputData, errorHandler, postsController.create);
+postsRouter.get("/", paginationValidator.posts, postsController.getPosts);
+postsRouter.get("/:id", ObjectIDValidator, postsController.findOneById);
+postsRouter.post("/", authMiddleware, postsValidator.inputData, errorHandler, postsController.create);
 postsRouter.put(
   "/:id",
   authMiddleware,
-  postsMiddleware.inputData,
+  postsValidator.inputData,
   errorHandler,
-  ObjectIDMiddleware,
+  ObjectIDValidator,
   postsController.updateOneById,
 );
-postsRouter.delete("/:id", authMiddleware, ObjectIDMiddleware, postsController.deleteOneById);
+postsRouter.delete("/:id", authMiddleware, ObjectIDValidator, postsController.deleteOneById);
