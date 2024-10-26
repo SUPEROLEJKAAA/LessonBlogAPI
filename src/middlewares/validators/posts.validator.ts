@@ -1,9 +1,8 @@
-import { body, param } from "express-validator";
-import { BlogEntityResponse } from "../types/blogs.type";
-import { blogsQueryRepository } from "../repositories/blogs/blogs.query.repository";
-import { ObjectId } from "mongodb";
+import { body } from "express-validator";
+import { BlogEntityResponse } from "../../types/blogs.type";
+import { blogsQueryRepository } from "../../repositories/blogs/blogs.query.repository";
 
-export const postsMiddleware = {
+export const postsValidator = {
   inputData: [
     body("title")
       .trim()

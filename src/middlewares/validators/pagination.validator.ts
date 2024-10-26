@@ -7,7 +7,7 @@ const availableSortBy: { blogs: string[]; posts: string[]; users: string[] } = {
 };
 const availableSortDirection: string[] = ["asc", "desc"];
 
-export const paginationMiddleware: {
+export const paginationValidator: {
   blogs: ValidationChain[];
   posts: ValidationChain[];
   users: ValidationChain[];

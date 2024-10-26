@@ -1,7 +1,6 @@
-import { body, param } from "express-validator";
-import { ObjectId } from "mongodb";
+import { body } from "express-validator";
 
-export const blogsMiddleware = {
+export const blogsValidator = {
   input: [
     body("name")
       .trim()
