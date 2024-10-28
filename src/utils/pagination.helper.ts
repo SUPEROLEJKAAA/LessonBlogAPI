@@ -20,6 +20,7 @@ function getUnionParams(data: PaginationParamType, type: PaginationTarget): Pagi
             ],
           }
         : {},
+    comments: params.postId ? { postId: { $eq: params.postId } } : {},
   };
   return {
     ...params,

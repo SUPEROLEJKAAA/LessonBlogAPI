@@ -16,3 +16,8 @@ export type UserEntityAuth = {
   loginOrEmail: string;
   password: string;
 };
+export type UserEntityJwt = {
+  id: string;
+  login: string;
+  email: string;
+};

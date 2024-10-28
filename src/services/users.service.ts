@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { ObjectId } from "mongodb";
-import { UserEntityAuth, UserEntityDB, UserEntityInput } from "../types/users.type";
+import { UserEntityAuth, UserEntityDB, UserEntityInput, UserEntityJwt } from "../types/users.type";
 import { usersCommandRepository } from "../repositories/users/users.command.repository";
 
 type Result<T> = {
@@ -46,12 +46,12 @@ export const usersService = {
     }
     return false;
   },
-  auth: async (data: UserEntityAuth): Promise<boolean> => {
+  auth: async (data: UserEntityAuth): Promise<UserEntityJwt | null> => {
     const user = await usersCommandRepository.findEmailOrLogin(data.loginOrEmail);
     if (user) {
       const compare = await bcrypt.compare(data.password, user.passwordHash);
-      return compare;
+      if (compare) return { id: user._id.toString(), login: user.login, email: user.email };
     }
-    return false;
+    return null;
   },
 };
