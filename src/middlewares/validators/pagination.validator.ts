@@ -1,9 +1,10 @@
 import { query, ValidationChain } from "express-validator";
 
-const availableSortBy: { blogs: string[]; posts: string[]; users: string[] } = {
+const availableSortBy: { blogs: string[]; posts: string[]; users: string[]; comments: string[] } = {
   blogs: ["id", "name", "description", "websiteUrl", "createdAt", "isMembership"],
   posts: ["id", "title", "shortDescription", "content", "blogId", "blogName", "createdAt"],
   users: ["id", "login", "email", "createdAt"],
+  comments: ["id", "content", "userId", "userLogin", "createdAt"],
 };
 const availableSortDirection: string[] = ["asc", "desc"];
 
@@ -11,6 +12,7 @@ export const paginationValidator: {
   blogs: ValidationChain[];
   posts: ValidationChain[];
   users: ValidationChain[];
+  comments: ValidationChain[];
 } = {
   blogs: [
     query("searchNameTerm").trim().optional().isString(),
@@ -32,5 +34,11 @@ export const paginationValidator: {
     query("pageSize").trim().optional().toInt().isInt(),
     query("searchLoginTerm").trim().optional().isString(),
     query("searchEmailTerm").trim().optional().isString(),
+  ],
+  comments: [
+    query("sortBy").trim().optional().isIn(availableSortBy.comments),
+    query("sortDirection").trim().optional().isIn(availableSortDirection),
+    query("pageNumber").trim().optional().toInt().isInt(),
+    query("pageSize").trim().optional().toInt().isInt(),
   ],
 };

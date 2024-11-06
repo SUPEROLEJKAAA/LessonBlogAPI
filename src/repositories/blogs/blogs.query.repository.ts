@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { blogsCollection } from "../../db/collections";
 import { BlogEntityResponse, BlogEntityDB } from "../../types/blogs.type";
 import { OutputPaginationType, PaginationParamType } from "../../types/pagination.type";
+import { apiError } from "../../middlewares/errors.middliware";
 
 export const blogsQueryRepository = {
   getBlogs: async (data: PaginationParamType): Promise<OutputPaginationType> => {
@@ -21,12 +22,12 @@ export const blogsQueryRepository = {
       items: result.map(mappging) as BlogEntityResponse[],
     };
   },
-  findOneById: async (id: string): Promise<BlogEntityResponse | null> => {
+  findOneById: async (id: string): Promise<BlogEntityResponse> => {
     const blog = await blogsCollection.findOne({ _id: new ObjectId(id) });
     if (blog) {
       return mappging(blog) as BlogEntityResponse;
     }
-    return null;
+    throw new apiError("Not Found", 404);
   },
 };
 

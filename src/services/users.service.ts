@@ -1,17 +1,13 @@
 import bcrypt from "bcrypt";
 import { ObjectId } from "mongodb";
-import { UserEntityAuth, UserEntityDB, UserEntityInput } from "../types/users.type";
+import { UserEntityDB, UserEntityInput } from "../types/users.type";
 import { usersCommandRepository } from "../repositories/users/users.command.repository";
-
-type Result<T> = {
-  status: boolean; //0, 1,
-  data?: T;
-  message?: string | Object[];
-};
+import { ErrorMessageType, ErrorsType } from "../types/errors.type";
+import { apiError } from "../middlewares/errors.middliware";
 
 export const usersService = {
-  create: async (data: UserEntityInput): Promise<Result<string>> => {
-    const errorArray = [];
+  create: async (data: UserEntityInput): Promise<string> => {
+    const errorArray: ErrorMessageType[] = [];
     const checkingMail = await usersCommandRepository.findEmail(data.email);
     if (checkingMail) {
       errorArray.push({ field: "email", message: "email should be unique" });
@@ -21,7 +17,7 @@ export const usersService = {
       errorArray.push({ field: "login", message: "login should be unique" });
     }
     if (errorArray.length) {
-      return { status: false, message: errorArray };
+      throw new apiError<ErrorsType>("Errors", 400, { errorsMessages: errorArray });
     }
     const passwordSalt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(data.password, passwordSalt);
@@ -34,24 +30,16 @@ export const usersService = {
     };
     const isCreated = await usersCommandRepository.create(prepareData);
     if (isCreated.insertedId) {
-      return { status: true, data: isCreated.insertedId.toString() };
+      return isCreated.insertedId.toString();
     }
-    return { status: false };
+    throw new apiError("Error", 500);
   },
-  delete: async (id: string): Promise<boolean> => {
+  delete: async (id: string): Promise<void> => {
     const user: UserEntityDB | null = await usersCommandRepository.findOneById(id);
     if (user) {
       await usersCommandRepository.deleteOneById(id);
-      return true;
+      return;
     }
-    return false;
-  },
-  auth: async (data: UserEntityAuth): Promise<boolean> => {
-    const user = await usersCommandRepository.findEmailOrLogin(data.loginOrEmail);
-    if (user) {
-      const compare = await bcrypt.compare(data.password, user.passwordHash);
-      return compare;
-    }
-    return false;
+    throw new apiError("Not found", 404);
   },
 };
