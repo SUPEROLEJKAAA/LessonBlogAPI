@@ -1,8 +1,8 @@
-import { Router } from "express";
+import { Response, Request, Router, NextFunction } from "express";
 import { blogsController } from "../controllers/blogs.controller";
 import { blogsValidator } from "../middlewares/validators/blogs.validator";
 import { authMiddleware } from "../middlewares/auth/auth.middleware";
-import { errorHandler } from "../middlewares/errors.middleware";
+import { validatorErrorHandler } from "../middlewares/validators/errors.validator";
 import { paginationValidator } from "../middlewares/validators/pagination.validator";
 import { postsValidator } from "../middlewares/validators/posts.validator";
 import { ObjectIDValidator } from "../middlewares/validators/objectid.validator";
@@ -15,7 +15,7 @@ blogsRouter.get(
   "/:id/posts",
   ObjectIDValidator,
   paginationValidator.posts,
-  errorHandler,
+  validatorErrorHandler,
   blogsController.getPostsByBlogId,
 );
 blogsRouter.post(
@@ -23,16 +23,16 @@ blogsRouter.post(
   authMiddleware,
   ObjectIDValidator,
   postsValidator.inputWithoutBlogId,
-  errorHandler,
+  validatorErrorHandler,
   blogsController.createPostsByBlogId,
 );
-blogsRouter.post("/", authMiddleware, blogsValidator.input, errorHandler, blogsController.create);
+blogsRouter.post("/", authMiddleware, blogsValidator.input, validatorErrorHandler, blogsController.create);
 blogsRouter.put(
   "/:id",
   authMiddleware,
   ObjectIDValidator,
   blogsValidator.input,
-  errorHandler,
+  validatorErrorHandler,
   blogsController.updateById,
 );
 blogsRouter.delete("/:id", authMiddleware, ObjectIDValidator, blogsController.deleteById);

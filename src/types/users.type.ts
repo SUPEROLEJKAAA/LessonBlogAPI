@@ -18,6 +18,4 @@ export type UserEntityAuth = {
 };
 export type UserEntityJwt = {
   id: string;
-  login: string;
-  email: string;
 };

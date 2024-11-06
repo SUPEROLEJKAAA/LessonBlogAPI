@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { matchedData } from "express-validator";
 import { usersService } from "../services/users.service";
-import { UserEntityInput } from "../types/users.type";
+import { UserEntityInput, UserEntityResponse } from "../types/users.type";
 import { usersQueryRepository } from "../repositories/users/users.query.repository";
 import { paginationHelper } from "../utils/pagination.helper";
 import { OutputPaginationType, PaginationParamType } from "../types/pagination.type";
@@ -13,23 +13,23 @@ export const usersController = {
     const users: OutputPaginationType = await usersQueryRepository.getUsers(params);
     res.status(200).json(users);
   },
-  create: async (req: Request, res: Response): Promise<void> => {
-    const data: UserEntityInput = matchedData(req);
-    const isUserCreated = await usersService.create(data);
-    if (isUserCreated.status && isUserCreated.data) {
-      const user = await usersQueryRepository.findOneById(isUserCreated.data);
+  create: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const data: UserEntityInput = matchedData(req);
+      const userId: string = await usersService.create(data);
+      const user: UserEntityResponse = await usersQueryRepository.findOneById(userId);
       res.status(201).json(user);
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(400).json({ errorsMessages: isUserCreated.message });
   },
-  delete: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    const isDeleted = await usersService.delete(id);
-    if (isDeleted) {
+  delete: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      await usersService.delete(id);
       res.status(204).send();
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
-  }
+  },
 };

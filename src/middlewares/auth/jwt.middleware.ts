@@ -8,7 +8,7 @@ export const JWTMiddleware = (req: Request, res: Response, next: NextFunction) =
       const payload = JWTService.verify(token);
       req.user = payload;
       next();
-      return
+      return;
     }
     throw new Error();
   } catch (e) {

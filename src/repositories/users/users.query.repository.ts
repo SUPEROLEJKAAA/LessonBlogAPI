@@ -2,10 +2,10 @@ import { ObjectId } from "mongodb";
 import { usersCollection } from "../../db/collections";
 import { UserEntityDB, UserEntityResponse } from "../../types/users.type";
 import { OutputPaginationType, PaginationParamType } from "../../types/pagination.type";
+import { apiError } from "../../middlewares/errors.middliware";
 
 export const usersQueryRepository = {
   getUsers: async (data: PaginationParamType): Promise<OutputPaginationType> => {
-    console.log(JSON.stringify(data.filter));
     const result: UserEntityDB[] = await usersCollection
       .find(data.filter ?? {})
       .sort({ [data.sortBy]: data.sortDirection as 1 | -1 })
@@ -19,19 +19,19 @@ export const usersQueryRepository = {
       page: data.pageNumber,
       pageSize: data.pageSize,
       totalCount: countDocuments,
-      items: result.map(mappging),
+      items: result.map(mapping),
     };
   },
-  findOneById: async (id: string): Promise<UserEntityResponse | null> => {
+  findOneById: async (id: string): Promise<UserEntityResponse> => {
     const user = await usersCollection.findOne({ _id: new ObjectId(id) });
     if (user) {
-      return mappging(user);
+      return mapping(user);
     }
-    return null;
+    throw new apiError("Not found", 404);
   },
 };
 
-const mappging = (user: UserEntityDB): UserEntityResponse => {
+const mapping = (user: UserEntityDB): UserEntityResponse => {
   return {
     id: user._id.toString(),
     login: user.login,

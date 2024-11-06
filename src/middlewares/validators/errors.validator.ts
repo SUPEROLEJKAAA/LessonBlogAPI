@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult, FieldValidationError } from "express-validator";
-import { ErrorMessageType, ErrorsType } from "../types/errors.type";
+import { ErrorMessageType, ErrorsType } from "../../types/errors.type";
 
-export const errorHandler = (req: Request, res: Response, next: NextFunction) => {
+export const validatorErrorHandler = (req: Request, res: Response, next: NextFunction) => {
   const data = validationResult(req).array({
     onlyFirstError: true,
   }) as FieldValidationError[];

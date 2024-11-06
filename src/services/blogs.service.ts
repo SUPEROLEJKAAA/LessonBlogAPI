@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { blogsCommandRepository } from "../repositories/blogs/blogs.command.repository";
 import { BlogEntityInput, BlogEntityDB } from "../types/blogs.type";
+import { apiError } from "../middlewares/errors.middliware";
 
 export const blogsService = {
   create: async (data: BlogEntityInput): Promise<string | null> => {
@@ -16,20 +17,20 @@ export const blogsService = {
     }
     return null;
   },
-  updateOneById: async (id: string, data: BlogEntityInput): Promise<boolean> => {
+  updateOneById: async (id: string, data: BlogEntityInput): Promise<void> => {
     const blog: BlogEntityDB | null = await blogsCommandRepository.findOneById(id);
     if (blog) {
       await blogsCommandRepository.updateOneById(id, data);
-      return true;
+      return;
     }
-    return false;
+    throw new apiError("Not Found", 404);
   },
-  deleteOneById: async (id: string): Promise<boolean> => {
+  deleteOneById: async (id: string): Promise<void> => {
     const blog: BlogEntityDB | null = await blogsCommandRepository.findOneById(id);
     if (blog) {
       await blogsCommandRepository.deleteOneById(id);
-      return true;
+      return;
     }
-    return false;
+    throw new apiError("Not Found", 404);
   },
 };

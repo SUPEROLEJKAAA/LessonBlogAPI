@@ -1,49 +1,38 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { matchedData } from "express-validator";
-import { JwtPayload } from "jsonwebtoken";
 import { commentsQueryRepository } from "../repositories/comments/comments.query.repository";
-import { commentsCommandRepository } from "../repositories/comments/comments.command.repository";
 import { CommentEntityResponse } from "../types/comments.type";
+import { commentsService } from "../services/comments.service";
 
 export const commentsController = {
-  findById: async (req: Request, res: Response): Promise<void> => {
-    const id = req.params.id;
-    const comment: CommentEntityResponse | null = await commentsQueryRepository.findOneById(id);
-    if (comment) {
+  findById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      const comment: CommentEntityResponse = await commentsQueryRepository.findOneById(id);
       res.status(200).send(comment);
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
   },
-  deleteById: async (req: Request, res: Response): Promise<void> => {
-    const id = req.params.id;
-    const user = req.user as JwtPayload;
-    const comment: CommentEntityResponse | null = await commentsQueryRepository.findOneById(id);
-    if (comment) {
-      if (comment.commentatorInfo.userId != user.id) {
-        res.status(403).send();
-        return;
-      }
-      await commentsCommandRepository.deleteOneById(id);
+  deleteById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      const payload = req.user;
+      await commentsService.deleteOneById(id, payload);
       res.status(204).send();
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
   },
-  updateById: async (req: Request, res: Response): Promise<void> => {
-    const id = req.params.id;
-    const user = req.user as JwtPayload;
-    const data: CommentEntityResponse = matchedData(req);
-    const comment: CommentEntityResponse | null = await commentsQueryRepository.findOneById(id);
-    if (comment) {
-      if (comment.commentatorInfo.userId != user.id) {
-        res.status(403).send();
-        return;
-      }
-      await commentsCommandRepository.updateOneById(id, data);
+  updateById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      const payload = req.user;
+      const data: CommentEntityResponse = matchedData(req);
+      await commentsService.updateOneById(id, payload, data);
       res.status(204).send();
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
   },
 };

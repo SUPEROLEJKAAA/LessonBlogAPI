@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { matchedData } from "express-validator";
 import { blogsService } from "../services/blogs.service";
 import { paginationHelper } from "../utils/pagination.helper";
@@ -16,24 +16,24 @@ export const blogsController = {
     const blog: BlogEntityResponse | null = await blogsQueryRepository.findOneById(blogId!);
     res.status(201).json(blog);
   },
-  updateById: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    const data: BlogEntityInput = matchedData(req);
-    const isUpdated: boolean = await blogsService.updateOneById(id, data);
-    if (isUpdated) {
+  updateById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      const data: BlogEntityInput = matchedData(req);
+      await blogsService.updateOneById(id, data);
       res.status(204).send();
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
   },
-  deleteById: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    const isDeleted: boolean = await blogsService.deleteOneById(id);
-    if (isDeleted) {
+  deleteById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      await blogsService.deleteOneById(id);
       res.status(204).send();
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
   },
   getBlogs: async (req: Request, res: Response): Promise<void> => {
     const data: PaginationParamType = matchedData(req);
@@ -41,36 +41,37 @@ export const blogsController = {
     const blogs: OutputPaginationType = await blogsQueryRepository.getBlogs(params);
     res.status(200).json(blogs);
   },
-  findById: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    const blog: BlogEntityResponse | null = await blogsQueryRepository.findOneById(id);
-    if (blog) {
+  findById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      const blog: BlogEntityResponse = await blogsQueryRepository.findOneById(id);
       res.status(200).json(blog);
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
   },
-  createPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    const data: PostEntityInput = { ...matchedData(req), blogId: id };
-    const postId: string | null = await postsService.create(data);
-    if (postId) {
-      const post: PostEntityResponse | null = await postsQueryRepository.findOneById(postId);
+  createPostsByBlogId: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      await blogsQueryRepository.findOneById(id);
+      const data: PostEntityInput = { ...matchedData(req), blogId: id };
+      const postId: string = await postsService.create(data);
+      const post: PostEntityResponse = await postsQueryRepository.findOneById(postId);
       res.status(201).send(post);
-      return;
+    } catch (e) {
+      next(e);
     }
-    res.status(404).send();
   },
-  getPostsByBlogId: async (req: Request, res: Response): Promise<void> => {
-    const id: string = req.params.id;
-    const blog: BlogEntityResponse | null = await blogsQueryRepository.findOneById(id);
-    if (!blog) {
-      res.status(404).send();
-      return;
+  getPostsByBlogId: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id: string = req.params.id;
+      const blog: BlogEntityResponse = await blogsQueryRepository.findOneById(id);
+      const data = { ...(matchedData(req) as PaginationParamType), blogId: blog.id };
+      const params = paginationHelper.mapping(data, "posts");
+      const posts = await postsQueryRepository.getPosts(params);
+      res.status(200).send(posts);
+    } catch (e) {
+      next(e);
     }
-    const data = { ...(matchedData(req) as PaginationParamType), blogId: blog.id };
-    const params = paginationHelper.mapping(data, "posts");
-    const posts = await postsQueryRepository.getPosts(params);
-    res.status(200).send(posts);
   },
 };

@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { commentsCollection } from "../../db/collections";
 import { CommentEntityDB, CommentEntityResponse } from "../../types/comments.type";
 import { PaginationParamType, OutputPaginationType } from "../../types/pagination.type";
+import { apiError } from "../../middlewares/errors.middliware";
 
 export const commentsQueryRepository = {
   getPosts: async (data: PaginationParamType): Promise<OutputPaginationType> => {
@@ -21,12 +22,12 @@ export const commentsQueryRepository = {
       items: result.map(mappging),
     };
   },
-  findOneById: async (id: string): Promise<CommentEntityResponse | null> => {
+  findOneById: async (id: string): Promise<CommentEntityResponse> => {
     const comment = await commentsCollection.findOne({ _id: new ObjectId(id) });
     if (comment) {
       return mappging(comment);
     }
-    return null;
+    throw new apiError("Not found", 404);
   },
 };
 

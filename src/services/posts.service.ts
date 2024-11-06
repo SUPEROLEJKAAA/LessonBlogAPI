@@ -3,12 +3,13 @@ import { postsCommandRepository } from "../repositories/posts/posts.command.repo
 import { PostEntityDB, PostEntityInput, PostEntityResponse } from "../types/posts.type";
 import { BlogEntityDB } from "../types/blogs.type";
 import { ObjectId } from "mongodb";
+import { apiError } from "../middlewares/errors.middliware";
 
 export const postsService = {
-  create: async (data: PostEntityInput): Promise<string | null> => {
+  create: async (data: PostEntityInput): Promise<string> => {
     const blog: BlogEntityDB | null = await blogsCommandRepository.findOneById(data.blogId);
     if (!blog) {
-      return null;
+      throw new apiError("Not found", 404);
     }
     const prepareData: PostEntityDB = {
       _id: new ObjectId(),
@@ -20,25 +21,25 @@ export const postsService = {
     if (isCreated.insertedId) {
       return isCreated.insertedId.toString();
     }
-    return null;
+    throw new apiError("Error", 500);
   },
   findOneById: async (id: string): Promise<PostEntityDB | null> => {
     return await postsCommandRepository.findOneById(id);
   },
-  updateOneById: async (id: string, data: PostEntityInput): Promise<boolean> => {
+  updateOneById: async (id: string, data: PostEntityInput): Promise<void> => {
     const post: PostEntityDB | null = await postsCommandRepository.findOneById(id);
     if (post) {
       await postsCommandRepository.updateOneById(id, data);
-      return true;
+      return;
     }
-    return false;
+    throw new apiError("Not Found", 404);
   },
-  deleteOneById: async (id: string): Promise<boolean> => {
+  deleteOneById: async (id: string): Promise<void> => {
     const post: PostEntityDB | null = await postsCommandRepository.findOneById(id);
     if (post) {
       await postsCommandRepository.deleteOneById(id);
-      return true;
+      return
     }
-    return false;
+    throw new apiError("Not Found", 404);
   },
 };

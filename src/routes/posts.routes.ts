@@ -2,7 +2,7 @@ import { Router } from "express";
 import { postsController } from "../controllers/posts.controller";
 import { authMiddleware } from "../middlewares/auth/auth.middleware";
 import { postsValidator } from "../middlewares/validators/posts.validator";
-import { errorHandler } from "../middlewares/errors.middleware";
+import { validatorErrorHandler } from "../middlewares/validators/errors.validator";
 import { paginationValidator } from "../middlewares/validators/pagination.validator";
 import { ObjectIDValidator } from "../middlewares/validators/objectid.validator";
 import { JWTMiddleware } from "../middlewares/auth/jwt.middleware";
@@ -16,16 +16,16 @@ postsRouter.get(
   "/:id/comments",
   ObjectIDValidator,
   paginationValidator.comments,
-  errorHandler,
+  validatorErrorHandler,
   postsController.getComments,
 );
-postsRouter.post("/", authMiddleware, postsValidator.inputData, errorHandler, postsController.create);
+postsRouter.post("/", authMiddleware, postsValidator.inputData, validatorErrorHandler, postsController.create);
 postsRouter.post(
   "/:id/comments",
   JWTMiddleware,
   ObjectIDValidator,
   commentsValidator.input,
-  errorHandler,
+  validatorErrorHandler,
   postsController.createComment,
 );
 postsRouter.put(
@@ -33,7 +33,7 @@ postsRouter.put(
   authMiddleware,
   ObjectIDValidator,
   postsValidator.inputData,
-  errorHandler,
+  validatorErrorHandler,
   postsController.updateOneById,
 );
 postsRouter.delete("/:id", authMiddleware, ObjectIDValidator, postsController.deleteOneById);
