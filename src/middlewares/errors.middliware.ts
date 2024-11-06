@@ -11,7 +11,7 @@ export class apiError<T> extends Error {
   }
 }
 
-export const errorHander = (err: any, req: Request, res: Response, next: NextFunction) => {
+export const errorHander = (err: any, req: Request, res: Response) => {
   if (err instanceof apiError) {
     if (err.data) {
       res.status(err.statusCode).send(err.data);
