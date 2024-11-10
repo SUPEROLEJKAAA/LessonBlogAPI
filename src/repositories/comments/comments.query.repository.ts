@@ -22,12 +22,12 @@ export const commentsQueryRepository = {
       items: result.map(mappging),
     };
   },
-  findOneById: async (id: string): Promise<CommentEntityResponse> => {
+  findOneById: async (id: string): Promise<CommentEntityResponse | null> => {
     const comment = await commentsCollection.findOne({ _id: new ObjectId(id) });
     if (comment) {
       return mappging(comment);
     }
-    throw new apiError("Not found", 404);
+    return null;
   },
 };
 

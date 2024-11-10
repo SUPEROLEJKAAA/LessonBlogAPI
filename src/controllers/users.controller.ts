@@ -17,7 +17,7 @@ export const usersController = {
     try {
       const data: UserEntityInput = matchedData(req);
       const userId: string = await usersService.create(data);
-      const user: UserEntityResponse = await usersQueryRepository.findOneById(userId);
+      const user: UserEntityResponse | null = await usersQueryRepository.findOneById(userId);
       res.status(201).json(user);
     } catch (e) {
       next(e);

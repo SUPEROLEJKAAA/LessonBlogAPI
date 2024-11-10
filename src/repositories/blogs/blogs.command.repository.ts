@@ -3,8 +3,9 @@ import { BlogEntityInput, BlogEntityDB } from "../../types/blogs.type";
 import { InsertOneResult, ObjectId } from "mongodb";
 
 export const blogsCommandRepository = {
-  create: async (blog: BlogEntityDB): Promise<InsertOneResult> => {
-    return await blogsCollection.insertOne(blog);
+  create: async (blog: BlogEntityDB): Promise<string> => {
+    const blogId = await blogsCollection.insertOne(blog);
+    return blogId.insertedId.toString();
   },
   findOneById: async (id: string): Promise<BlogEntityDB | null> => {
     return await blogsCollection.findOne({ _id: new ObjectId(id) });

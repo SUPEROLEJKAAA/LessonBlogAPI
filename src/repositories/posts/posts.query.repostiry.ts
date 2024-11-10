@@ -22,12 +22,12 @@ export const postsQueryRepository = {
       items: result.map(mappging),
     };
   },
-  findOneById: async (id: string): Promise<PostEntityResponse> => {
+  findOneById: async (id: string): Promise<PostEntityResponse | null> => {
     const post = await postsCollection.findOne({ _id: new ObjectId(id) });
     if (post) {
       return mappging(post);
     }
-    throw new apiError("Not found", 404);
+    return null;
   },
 };
 

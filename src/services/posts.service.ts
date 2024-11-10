@@ -17,9 +17,9 @@ export const postsService = {
       blogName: blog!.name,
       createdAt: new Date(),
     };
-    const isCreated = await postsCommandRepository.create(prepareData);
-    if (isCreated.insertedId) {
-      return isCreated.insertedId.toString();
+    const postId = await postsCommandRepository.create(prepareData);
+    if (postId) {
+      return postId
     }
     throw new apiError("Error", 500);
   },

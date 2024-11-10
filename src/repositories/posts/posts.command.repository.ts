@@ -1,10 +1,11 @@
 import { PostEntityInput, PostEntityDB } from "../../types/posts.type";
 import { postsCollection } from "../../db/collections";
-import { InsertOneResult, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 
 export const postsCommandRepository = {
-  create: async (post: PostEntityDB): Promise<InsertOneResult> => {
-    return await postsCollection.insertOne(post);
+  create: async (post: PostEntityDB): Promise<string> => {
+    const postId = await postsCollection.insertOne(post);
+    return postId.insertedId.toString();
   },
   findOneById: async (id: string): Promise<PostEntityDB | null> => {
     return await postsCollection.findOne({ _id: new ObjectId(id) });

@@ -1,16 +1,20 @@
 import { UserEntityDB, UserEntityInput, UserEntityResponse } from "../../types/users.type";
 import { usersCollection } from "../../db/collections";
-import { InsertOneResult, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 
 export const usersCommandRepository = {
-  create: async (post: UserEntityDB): Promise<InsertOneResult> => {
-    return await usersCollection.insertOne(post);
+  create: async (post: UserEntityDB): Promise<string> => {
+    const userId = await usersCollection.insertOne(post);
+    return userId.insertedId.toString();
   },
   findOneById: async (id: string): Promise<UserEntityDB | null> => {
     return await usersCollection.findOne({ _id: new ObjectId(id) });
   },
+  findOneByCode: async (code: string): Promise<UserEntityDB | null> => {
+    return await usersCollection.findOne({ "confirmEmail.code": code });
+  },
   findLogin: async (login: string): Promise<UserEntityDB | null> => {
-    return await usersCollection.findOne({ email: { $regex: login, $options: "i" } });
+    return await usersCollection.findOne({ login: { $regex: login, $options: "i" } });
   },
   findEmail: async (email: string): Promise<UserEntityDB | null> => {
     return await usersCollection.findOne({ email: { $regex: email, $options: "i" } });
@@ -20,7 +24,7 @@ export const usersCommandRepository = {
       $or: [{ email: { $regex: data, $options: "i" } }, { login: { $regex: data, $options: "i" } }],
     });
   },
-  updateOneById: async (id: string, data: UserEntityInput): Promise<void> => {
+  updateOneById: async (id: string, data: Partial<UserEntityDB>): Promise<void> => {
     await usersCollection.findOneAndUpdate({ _id: new ObjectId(id) }, { $set: { ...data } });
     return;
   },

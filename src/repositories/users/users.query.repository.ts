@@ -22,12 +22,12 @@ export const usersQueryRepository = {
       items: result.map(mapping),
     };
   },
-  findOneById: async (id: string): Promise<UserEntityResponse> => {
+  findOneById: async (id: string): Promise<UserEntityResponse | null> => {
     const user = await usersCollection.findOne({ _id: new ObjectId(id) });
     if (user) {
       return mapping(user);
     }
-    throw new apiError("Not found", 404);
+    return null;
   },
 };
 

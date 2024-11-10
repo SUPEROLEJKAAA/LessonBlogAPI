@@ -5,11 +5,11 @@ import { commentsService } from "../services/comments.service";
 import { paginationHelper } from "../utils/pagination.helper";
 import { postsQueryRepository } from "../repositories/posts/posts.query.repostiry";
 import { commentsQueryRepository } from "../repositories/comments/comments.query.repository";
-import { usersQueryRepository } from "../repositories/users/users.query.repository";
 import { PostEntityDB, PostEntityInput, PostEntityResponse } from "../types/posts.type";
 import { OutputPaginationType, PaginationParamType } from "../types/pagination.type";
 import { CommentEntityResponse } from "../types/comments.type";
-import { UserEntityResponse } from "../types/users.type";
+import { postsCommandRepository } from "../repositories/posts/posts.command.repository";
+import { apiError } from "../middlewares/errors.middliware";
 
 export const postsController = {
   getPosts: async (req: Request, res: Response): Promise<void> => {
@@ -22,7 +22,7 @@ export const postsController = {
     try {
       const data: PostEntityInput = matchedData(req);
       const postId: string = await postsService.create(data);
-      const post: PostEntityResponse = await postsQueryRepository.findOneById(postId);
+      const post: PostEntityResponse | null = await postsQueryRepository.findOneById(postId);
       res.status(201).json(post);
     } catch (e) {
       next(e);
@@ -31,7 +31,7 @@ export const postsController = {
   findOneById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id: string = req.params.id;
-      const post: PostEntityResponse = await postsQueryRepository.findOneById(id);
+      const post: PostEntityResponse | null = await postsQueryRepository.findOneById(id);
       res.status(200).json(post);
     } catch (e) {
       next(e);
@@ -61,9 +61,7 @@ export const postsController = {
       const id: string = req.params.id;
       const payload = req.user;
       const data: PostEntityInput = matchedData(req);
-      await postsQueryRepository.findOneById(id);
-      const user: UserEntityResponse = await usersQueryRepository.findOneById(payload.userId);
-      const commentId: string | null = await commentsService.create(id, data, user);
+      const commentId: string = await commentsService.create(id, data, payload.id);
       const comment: CommentEntityResponse | null = await commentsQueryRepository.findOneById(commentId);
       res.status(201).send(comment);
     } catch (e) {
@@ -73,7 +71,10 @@ export const postsController = {
   getComments: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id: string = req.params.id;
-      await postsQueryRepository.findOneById(id);
+      const post = await postsCommandRepository.findOneById(id);
+      if (!post) {
+        throw new apiError("Not found post", 404);
+      }
       const data: PaginationParamType = { ...matchedData(req), postId: id };
       const params: PaginationParamType = paginationHelper.mapping(data, "comments");
       const comments: OutputPaginationType = await commentsQueryRepository.getPosts(params);
