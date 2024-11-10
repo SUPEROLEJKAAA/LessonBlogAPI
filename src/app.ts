@@ -1,4 +1,5 @@
 import express, { Response, Request, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import { blogsRouter } from "./routes/blogs.routes";
 import { postsRouter } from "./routes/posts.routes";
 import { testsRouter } from "./routes/tests.routes";
@@ -10,6 +11,7 @@ import { errorHander } from "./middlewares/errors.middliware";
 export const app = express();
 
 app.use(express.json());
+app.use(cookieParser())
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log("--------------");
   console.log(`${req.method} | ${req.url}`);

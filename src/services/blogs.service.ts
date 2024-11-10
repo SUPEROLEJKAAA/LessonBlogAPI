@@ -11,11 +11,11 @@ export const blogsService = {
       createdAt: new Date(),
       isMembership: false,
     };
-    const isCreated = await blogsCommandRepository.create(prepareData);
-    if (isCreated) {
-      return isCreated.insertedId.toString();
+    const blogId = await blogsCommandRepository.create(prepareData);
+    if (blogId) {
+      return blogId;
     }
-    return null;
+    throw new apiError("Error", 500);
   },
   updateOneById: async (id: string, data: BlogEntityInput): Promise<void> => {
     const blog: BlogEntityDB | null = await blogsCommandRepository.findOneById(id);

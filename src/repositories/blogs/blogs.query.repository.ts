@@ -22,12 +22,12 @@ export const blogsQueryRepository = {
       items: result.map(mappging) as BlogEntityResponse[],
     };
   },
-  findOneById: async (id: string): Promise<BlogEntityResponse> => {
+  findOneById: async (id: string): Promise<BlogEntityResponse | null> => {
     const blog = await blogsCollection.findOne({ _id: new ObjectId(id) });
     if (blog) {
       return mappging(blog) as BlogEntityResponse;
     }
-    throw new apiError("Not Found", 404);
+    return null;
   },
 };
 

@@ -4,8 +4,9 @@ import { CommentEntityInput } from "../../types/comments.type";
 import { commentsCollection } from "../../db/collections";
 
 export const commentsCommandRepository = {
-  create: async (post: CommentEntityDB): Promise<InsertOneResult> => {
-    return await commentsCollection.insertOne(post);
+  create: async (comment: CommentEntityDB): Promise<string> => {
+    const commentId = await commentsCollection.insertOne(comment);
+    return commentId.insertedId.toString();
   },
   findOneById: async (id: string): Promise<CommentEntityDB | null> => {
     return await commentsCollection.findOne({ _id: new ObjectId(id) });

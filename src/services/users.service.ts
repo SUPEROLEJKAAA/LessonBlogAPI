@@ -2,23 +2,12 @@ import bcrypt from "bcrypt";
 import { ObjectId } from "mongodb";
 import { UserEntityDB, UserEntityInput } from "../types/users.type";
 import { usersCommandRepository } from "../repositories/users/users.command.repository";
-import { ErrorMessageType, ErrorsType } from "../types/errors.type";
 import { apiError } from "../middlewares/errors.middliware";
+import { ErrorMessageType, ErrorsType } from "../types/errors.type";
 
 export const usersService = {
   create: async (data: UserEntityInput): Promise<string> => {
-    const errorArray: ErrorMessageType[] = [];
-    const checkingMail = await usersCommandRepository.findEmail(data.email);
-    if (checkingMail) {
-      errorArray.push({ field: "email", message: "email should be unique" });
-    }
-    const checkingLogin = await usersCommandRepository.findLogin(data.login);
-    if (checkingLogin) {
-      errorArray.push({ field: "login", message: "login should be unique" });
-    }
-    if (errorArray.length) {
-      throw new apiError<ErrorsType>("Errors", 400, { errorsMessages: errorArray });
-    }
+    await _existUser(data);
     const passwordSalt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(data.password, passwordSalt);
     const prepareData: UserEntityDB = {
@@ -27,10 +16,15 @@ export const usersService = {
       email: data.email,
       passwordHash,
       createdAt: new Date(),
+      confirmEmail: {
+        isActivated: true,
+        code: null,
+        exp: null,
+      },
     };
-    const isCreated = await usersCommandRepository.create(prepareData);
-    if (isCreated.insertedId) {
-      return isCreated.insertedId.toString();
+    const userId: string | null = await usersCommandRepository.create(prepareData);
+    if (userId) {
+      return userId;
     }
     throw new apiError("Error", 500);
   },
@@ -42,4 +36,20 @@ export const usersService = {
     }
     throw new apiError("Not found", 404);
   },
+};
+
+const _existUser = async (data: UserEntityInput): Promise<void> => {
+  const errorArray: ErrorMessageType[] = [];
+  const checkingMail = await usersCommandRepository.findEmail(data.email);
+  if (checkingMail) {
+    errorArray.push({ field: "email", message: "email should be unique" });
+  }
+  const checkingLogin = await usersCommandRepository.findLogin(data.login);
+  if (checkingLogin) {
+    errorArray.push({ field: "login", message: "login should be unique" });
+  }
+  if (errorArray.length) {
+    throw new apiError<ErrorsType>("Errors", 400, { errorsMessages: errorArray });
+  }
+  return;
 };

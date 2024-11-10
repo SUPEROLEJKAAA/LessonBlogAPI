@@ -8,7 +8,7 @@ export const commentsController = {
   findById: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id: string = req.params.id;
-      const comment: CommentEntityResponse = await commentsQueryRepository.findOneById(id);
+      const comment: CommentEntityResponse | null = await commentsQueryRepository.findOneById(id);
       res.status(200).send(comment);
     } catch (e) {
       next(e);
