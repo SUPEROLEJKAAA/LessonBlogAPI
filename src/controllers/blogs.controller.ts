@@ -3,12 +3,11 @@ import { matchedData } from "express-validator";
 import { blogsService } from "../services/blogs.service";
 import { paginationHelper } from "../utils/pagination.helper";
 import { blogsQueryRepository } from "../repositories/blogs/blogs.query.repository";
-import { BlogEntityDB, BlogEntityInput, BlogEntityResponse } from "../types/blogs.type";
+import { BlogEntityInput, BlogEntityResponse } from "../types/blogs.type";
 import { OutputPaginationType, PaginationParamType } from "../types/pagination.type";
 import { postsQueryRepository } from "../repositories/posts/posts.query.repostiry";
 import { PostEntityInput, PostEntityResponse } from "../types/posts.type";
 import { postsService } from "../services/posts.service";
-import { url } from "inspector";
 import { apiError } from "../middlewares/errors.middliware";
 
 export const blogsController = {

@@ -10,10 +10,10 @@ export const commentsRouter = Router();
 commentsRouter.get("/:id", ObjectIDValidator, commentsController.findById);
 commentsRouter.put(
   "/:id",
-  JWTMiddleware,
+  JWTMiddleware.access,
   ObjectIDValidator,
   commentsValidator.input,
   validatorErrorHandler,
   commentsController.updateById,
 );
-commentsRouter.delete("/:id", JWTMiddleware, ObjectIDValidator, commentsController.deleteById);
+commentsRouter.delete("/:id", JWTMiddleware.access, ObjectIDValidator, commentsController.deleteById);

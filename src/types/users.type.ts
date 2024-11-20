@@ -23,4 +23,5 @@ export type UserEntityAuth = {
 };
 export type UserEntityJwt = {
   id: string;
+  deviceId?: string;
 };

@@ -22,7 +22,7 @@ postsRouter.get(
 postsRouter.post("/", authMiddleware, postsValidator.inputData, validatorErrorHandler, postsController.create);
 postsRouter.post(
   "/:id/comments",
-  JWTMiddleware,
+  JWTMiddleware.access,
   ObjectIDValidator,
   commentsValidator.input,
   validatorErrorHandler,
