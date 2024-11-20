@@ -10,8 +10,8 @@ const transporter = nodemailer.createTransport({
 });
 
 export const mailHelper = {
-  registation: async (email: string, code: string) => {
-    await transporter.sendMail({
+  registation: (email: string, code: string) => {
+    transporter.sendMail({
       from: config.email,
       to: email,
       subject: "Thank you for your registration",
@@ -19,7 +19,7 @@ export const mailHelper = {
     });
   },
   resend: async (email: string, code: string) => {
-    await transporter.sendMail({
+     transporter.sendMail({
       from: config.email,
       to: email,
       subject: "Re-link to account activation",

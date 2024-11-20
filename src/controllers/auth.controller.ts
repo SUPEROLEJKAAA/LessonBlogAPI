@@ -1,44 +1,38 @@
 import { NextFunction, Request, Response } from "express";
-import { UserEntityAuth, UserEntityDB, UserEntityInput, UserEntityJwt, UserEntityResponse } from "../types/users.type";
+import { UserEntityAuth, UserEntityDB, UserEntityInput } from "../types/users.type";
 import { matchedData } from "express-validator";
-import { JWTService } from "../services/jwt.service";
 import { authService } from "../services/auth.service";
 import { usersCommandRepository } from "../repositories/users/users.command.repository";
-import { tokensService } from "../services/tokens.service";
+import { browserHelper } from "../utils/browser.helper";
+import { devicesService } from "../services/devices.service";
 
 export const authController = {
   login: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const data: UserEntityAuth = matchedData(req);
-      const user: UserEntityJwt = await authService.login(data);
-      const accessToken: string = await JWTService.generation(user.id, "10s");
-      const refreshToken: string = await JWTService.generation(user.id, "20s");
-      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
-      res.status(200).send({ accessToken });
+      const browser = browserHelper(req);
+      const jwt = await authService.login(data, browser);
+      res.cookie("refreshToken", jwt.refreshToken, { httpOnly: true, secure: true, sameSite: "lax" });
+      res.status(200).send({ accessToken: jwt.accessToken });
     } catch (e) {
       next(e);
     }
   },
   refreshToken: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const token: string = req.cookies.refreshToken;
-      const payload = JWTService.verify(token);
-      await tokensService.checkTokenBlackList(token);
-      await tokensService.addTokenBlackList(token);
-      const accessToken: string = JWTService.generation(payload.id, "10s");
-      const refreshToken: string = JWTService.generation(payload.id, "20s");
-      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
-      res.status(200).send({ accessToken });
+      const payload = req.user;
+      const browser = browserHelper(req);
+      const jwt = await authService.refreshToken(payload, browser);
+      res.cookie("refreshToken", jwt.refreshToken, { httpOnly: true, secure: true, sameSite: "lax" });
+      res.status(200).send({ accessToken: jwt.accessToken });
     } catch (e) {
       next(e);
     }
   },
   logout: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const token: string = req.cookies.refreshToken;
-      JWTService.verify(token);
-      await tokensService.checkTokenBlackList(token);
-      await tokensService.addTokenBlackList(token);
+      const payload = req.user;
+      await devicesService.deleteOne(payload.id, payload.deviceId!);
       res.status(204).send();
     } catch (e) {
       next(e);

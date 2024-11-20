@@ -1,8 +1,9 @@
-import { ErrorMessageType } from "./errors.type";
+import { ObjectId } from "mongodb";
 
-export type Result<T> = {
-    status: number | string; //0, 1,
-    data?: T;
-    errors?: ErrorMessageType[];
-    message?: string;
-  };
+export type RateLimitDB = {
+  _id: ObjectId;
+  ip: string;
+  url: string;
+  timestamp: number;
+};
+export type RateLimitInput = Omit<RateLimitDB, "_id">;
