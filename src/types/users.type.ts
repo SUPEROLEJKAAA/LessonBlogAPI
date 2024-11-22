@@ -11,10 +11,19 @@ export type UserEntityDB = {
     code: string | null;
     exp: number | null;
   };
+  recoveryPassword: {
+    code: string | null;
+    exp: number | null;
+  };
 };
 
-export type UserEntityResponse = Omit<UserEntityDB, "passwordHash" | "_id" | "confirmEmail"> & { id: string };
-export type UserEntityInput = Omit<UserEntityDB, "passwordHash" | "createdAt" | "_id" | "confirmEmail"> & {
+export type UserEntityResponse = Omit<UserEntityDB, "passwordHash" | "_id" | "confirmEmail" | "recoveryPassword"> & {
+  id: string;
+};
+export type UserEntityInput = Omit<
+  UserEntityDB,
+  "passwordHash" | "createdAt" | "_id" | "confirmEmail" | "recoveryPassword"
+> & {
   password: string;
 };
 export type UserEntityAuth = {

@@ -21,6 +21,10 @@ export const usersService = {
         code: null,
         exp: null,
       },
+      recoveryPassword: {
+        exp: null,
+        code: null,
+      },
     };
     const userId: string | null = await usersCommandRepository.create(prepareData);
     if (userId) {

@@ -75,4 +75,18 @@ export const authController = {
       next(e);
     }
   },
+  recoveryPassword: async (req: Request, res: Response, next: NextFunction) => {
+    const data = matchedData(req);
+    await authService.recoveryPassword(data.email);
+    res.status(204).send();
+  },
+  newPassword: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = matchedData(req);
+      await authService.newPassword(data);
+      res.status(204).send();
+    } catch (e) {
+      next(e);
+    }
+  },
 };
