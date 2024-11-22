@@ -11,7 +11,7 @@ export const usersCommandRepository = {
     return await usersCollection.findOne({ _id: new ObjectId(id) });
   },
   findOneByCode: async (code: string): Promise<UserEntityDB | null> => {
-    return await usersCollection.findOne({ "confirmEmail.code": code });
+    return await usersCollection.findOne({ $or: [{ "confirmEmail.code": code }, { "recoveryPassword.code": code }] });
   },
   findLogin: async (login: string): Promise<UserEntityDB | null> => {
     return await usersCollection.findOne({ login: { $regex: login, $options: "i" } });
@@ -25,7 +25,7 @@ export const usersCommandRepository = {
     });
   },
   updateOneById: async (id: string, data: Partial<UserEntityDB>): Promise<void> => {
-    await usersCollection.findOneAndUpdate({ _id: new ObjectId(id) }, { $set: { ...data } });
+    await usersCollection.updateOne({ _id: new ObjectId(id) }, { $set: { ...data } });
     return;
   },
   deleteOneById: async (id: string): Promise<void> => {

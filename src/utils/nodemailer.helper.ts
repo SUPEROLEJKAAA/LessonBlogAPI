@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { config } from "../config";
+import { emitWarning } from "process";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -18,12 +19,20 @@ export const mailHelper = {
       html: `<h1>Thank for your registration</h1> <p>To finish registration please follow the link below:<a href='https://somesite.com/confirm-email?code=${code}'>complete registration</a></p>`,
     });
   },
-  resend: async (email: string, code: string) => {
-     transporter.sendMail({
+  resend: (email: string, code: string) => {
+    transporter.sendMail({
       from: config.email,
       to: email,
       subject: "Re-link to account activation",
       html: `<h1>Re-link to account activation</h1> <p>To finish registration please follow the link below:<a href='https://somesite.com/confirm-email?code=${code}'>complete registration</a></p>`,
+    });
+  },
+  recoveryPassword: (email: string, code: string) => {
+    transporter.sendMail({
+      from: config.email,
+      to: email,
+      subject: "Recovery password",
+      html: `<h1>Password recovery</h1> <p>To finish password recovery please follow the link below:<a href='https://somesite.com/password-recovery?recoveryCode=${code}'>complete registration</a></p>`,
     });
   },
 };

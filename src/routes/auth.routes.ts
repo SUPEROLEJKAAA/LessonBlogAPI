@@ -26,3 +26,17 @@ authRouter.post(
 );
 authRouter.post("/refresh-token", JWTMiddleware.refresh, authController.refreshToken);
 authRouter.post("/logout", JWTMiddleware.refresh, authController.logout);
+authRouter.post(
+  "/password-recovery",
+  rateLimit,
+  authValidator.recoveryPassword,
+  validatorErrorHandler,
+  authController.recoveryPassword,
+);
+authRouter.post(
+  "/new-password",
+  rateLimit,
+  authValidator.newPassword,
+  validatorErrorHandler,
+  authController.newPassword,
+);
